@@ -1,0 +1,13 @@
+/-------------------------------------\
+|############ Labyrinth ##############|
+|==  A PixelCat Engine Video Game   ==|
+\-------------------------------------/
+
+++ High Level Concept ++
+
+-random hamiltonian cycle graphs form the basis for levels
+-each vertex is a room in the labyrinth, each edge is a door/portal from one room to another
+-each level requires the player to navigate the given rooms for that level in a hamiltonian cycle, and upon failing is teleported to the first room (or maybe a random room?)
+-each level may have more than one correct path
+-each room has an altar of sorts to activate, and once a cycle has all its altars activated a staircase/portal to the next level appears in the first room
+-consideration: have a map that gets updated
