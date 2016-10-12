@@ -1,4 +1,4 @@
-package info.masterfrog.labyrinth.core.main;
+package info.masterfrog.labyrinth.main;
 
 import info.masterfrog.labyrinth.core.level.puzzle.SlidePuzzle;
 

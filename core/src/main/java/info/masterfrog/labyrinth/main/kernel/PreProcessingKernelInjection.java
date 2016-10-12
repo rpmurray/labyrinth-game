@@ -1,8 +1,6 @@
-package info.masterfrog.labyrinth.core.main.kernel;
+package info.masterfrog.labyrinth.main.kernel;
 
 import com.google.common.collect.ImmutableSet;
-import info.masterfrog.labyrinth.core.enumeration.EntityHandle;
-import info.masterfrog.labyrinth.core.enumeration.LevelHandle;
 import info.masterfrog.labyrinth.core.entity.EntitiesManager;
 import info.masterfrog.labyrinth.core.level.LevelManager;
 import info.masterfrog.labyrinth.core.level.StartScreenLevelManager;
@@ -14,10 +12,6 @@ import info.masterfrog.pixelcat.engine.exception.TerminalGameException;
 import info.masterfrog.pixelcat.engine.exception.TransientGameException;
 import info.masterfrog.pixelcat.engine.hid.HIDEventEnum;
 import info.masterfrog.pixelcat.engine.kernel.*;
-import info.masterfrog.pixelcat.engine.logic.gameobject.feature.Renderable;
-import info.masterfrog.labyrinth.core.enumeration.GameObjectManagerHandle;
-
-import java.awt.*;
 
 public class PreProcessingKernelInjection implements KernelInjection {
     private LevelManager levelManager;
@@ -44,7 +38,7 @@ public class PreProcessingKernelInjection implements KernelInjection {
             // level management
             switch (levelManager.getCurrentLevel()) {
                 case START_SCREEN:
-                    StartScreenLevelManager.getInstance().run(kernelState);
+                    StartScreenLevelManager.getInstance().run(kernelState, levelManager, entitiesManager);
                     break;
                 default:
                     throw new TerminalErrorException(ImmutableSet.of(new TerminalGameException(GameErrorCode.LOGIC_ERROR, "Invalid level transition")));

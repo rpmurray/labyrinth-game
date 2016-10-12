@@ -1,6 +1,6 @@
 package info.masterfrog.labyrinth.core.enumeration;
 
-public enum GameObjectManagerHandle {
+public enum EntitiesManagerHandle {
     COMMON,
     START_SCREEN,
     LABYRINTH,

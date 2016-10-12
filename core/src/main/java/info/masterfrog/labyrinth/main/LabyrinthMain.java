@@ -1,13 +1,13 @@
-package info.masterfrog.labyrinth.core.main;
+package info.masterfrog.labyrinth.main;
 
 import com.google.common.collect.ImmutableMap;
+import info.masterfrog.labyrinth.main.kernel.PreProcessingKernelInjection;
 import info.masterfrog.pixelcat.engine.common.printer.Printer;
 import info.masterfrog.pixelcat.engine.common.printer.PrinterFactory;
 import info.masterfrog.pixelcat.engine.exception.TerminalErrorException;
 import info.masterfrog.pixelcat.engine.hid.HIDEventEnum;
 import info.masterfrog.labyrinth.core.entity.EntitiesManager;
 import info.masterfrog.labyrinth.core.level.LevelManager;
-import info.masterfrog.labyrinth.core.main.kernel.PreProcessingKernelInjection;
 import info.masterfrog.labyrinth.core.enumeration.LevelHandle;
 import info.masterfrog.pixelcat.engine.kernel.*;
 
@@ -39,7 +39,7 @@ public class LabyrinthMain {
             LevelManager levelManager = new LevelManager(startingScreen);
             EntitiesManager entitiesManager = new EntitiesManager(kernelState);
             entitiesManager.init();
-            kernel.registerGameObjectManagers(entitiesManager.getGameObjectManagerList(startingScreen));
+            kernel.registerGameObjectManagers(entitiesManager.getEntitiesManagerList(startingScreen));
 
             // define kernel injections
             Map<KernelInjectionEventEnum, KernelInjection> kernelInjectionMap = ImmutableMap.<KernelInjectionEventEnum, KernelInjection>of(
