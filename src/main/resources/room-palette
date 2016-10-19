@@ -1,0 +1,13 @@
++general+
+black     - 215
+shadow    - 208
++wall+
+highlight - 18
+light     - 105
+medium    - 141
+dark      - 178
++floor+
+light     - 99
+medium    - 135
+dark      - 178
+contrast  - 107
