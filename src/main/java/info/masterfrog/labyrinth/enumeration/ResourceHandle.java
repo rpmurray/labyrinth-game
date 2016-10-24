@@ -1,0 +1,28 @@
+package info.masterfrog.labyrinth.enumeration;
+
+public enum ResourceHandle {
+    // Common
+    // N/A
+
+    // Start Screen
+    START_SCREEN__IMAGE__BACKGROUND,
+    START_SCREEN__IMAGE__TITLE,
+    START_SCREEN__IMAGE__DEV_LOGO,
+    START_SCREEN__IMAGE__START_TEXT,
+    START_SCREEN__IMAGE__FOOTNOTE_TEXT,
+    START_SCREEN__SPRITE__BACKGROUND,
+    START_SCREEN__SPRITE__TITLE,
+    START_SCREEN__SPRITE__DEV_LOGO,
+    START_SCREEN__SPRITE__START_TEXT,
+    START_SCREEN__SPRITE__FOOTNOTE_TEXT,
+    START_SCREEN__SOUND__INTRO_MUSIC,
+
+    // Labyrinth
+    LABYRINTH__CHARACTER,
+
+    // Menu
+    MENU__BACKGROUND,
+    MENU__TITLE_TEXT,
+    MENU__RESUME_OPTION_TEXT,
+    ;
+}

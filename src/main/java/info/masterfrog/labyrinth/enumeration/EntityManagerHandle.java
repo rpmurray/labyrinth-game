@@ -1,6 +1,6 @@
 package info.masterfrog.labyrinth.enumeration;
 
-public enum EntitiesManagerHandle {
+public enum EntityManagerHandle {
     CATALOG,
     COMMON,
     START_SCREEN,

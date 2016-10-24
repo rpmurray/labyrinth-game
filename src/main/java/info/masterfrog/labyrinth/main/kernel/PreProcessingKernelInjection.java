@@ -1,27 +1,27 @@
 package info.masterfrog.labyrinth.main.kernel;
 
-import com.google.common.collect.ImmutableSet;
-import info.masterfrog.labyrinth.entity.EntitiesEnvironmentManager;
-import info.masterfrog.labyrinth.level.LevelManager;
+import info.masterfrog.labyrinth.entity.EnvironmentManager;
+import info.masterfrog.labyrinth.exception.LabyrinthGameErrorCode;
+import info.masterfrog.labyrinth.level.LevelStateManager;
 import info.masterfrog.labyrinth.level.StartScreenLevelManager;
 import info.masterfrog.pixelcat.engine.common.printer.Printer;
 import info.masterfrog.pixelcat.engine.common.printer.PrinterFactory;
-import info.masterfrog.pixelcat.engine.exception.GameErrorCode;
-import info.masterfrog.pixelcat.engine.exception.TerminalErrorException;
-import info.masterfrog.pixelcat.engine.exception.TerminalGameException;
-import info.masterfrog.pixelcat.engine.exception.TransientGameException;
+import info.masterfrog.pixelcat.engine.common.util.SetBuilder;
+import info.masterfrog.pixelcat.engine.exception.*;
 import info.masterfrog.pixelcat.engine.hid.HIDEventEnum;
 import info.masterfrog.pixelcat.engine.kernel.*;
 
+import java.util.HashSet;
+
 public class PreProcessingKernelInjection implements KernelInjection {
-    private LevelManager levelManager;
-    private EntitiesEnvironmentManager entitiesEnvironmentManager;
+    private LevelStateManager levelStateManager;
+    private EnvironmentManager environmentManager;
 
     private static final Printer PRINTER = PrinterFactory.getInstance().createPrinter(PreProcessingKernelInjection.class);
 
-    public PreProcessingKernelInjection(LevelManager levelManager, EntitiesEnvironmentManager entitiesEnvironmentManager) {
-        this.levelManager = levelManager;
-        this.entitiesEnvironmentManager = entitiesEnvironmentManager;
+    public PreProcessingKernelInjection(LevelStateManager levelStateManager, EnvironmentManager environmentManager) {
+        this.levelStateManager = levelStateManager;
+        this.environmentManager = environmentManager;
     }
 
     public void run(KernelState kernelState) throws TransientGameException {
@@ -29,24 +29,29 @@ public class PreProcessingKernelInjection implements KernelInjection {
             PRINTER.printTrace("Labyrinth kernel-injected pre-processor started...");
 
             // handle exit trigger binding
-            if (entitiesEnvironmentManager.getFlag(EntitiesEnvironmentManager.FLAG__START_INITIALIZED) && !entitiesEnvironmentManager.getFlag(EntitiesEnvironmentManager.FLAG__EXIT_KEY_BOUND)) {
+            if (environmentManager.getFlag(EnvironmentManager.FLAG__START_INITIALIZED) && !environmentManager.getFlag(EnvironmentManager.FLAG__EXIT_KEY_BOUND)) {
                 KernelActionBinder kernelActionBinder = (KernelActionBinder) kernelState.getProperty(KernelStatePropertyEnum.KERNEL_ACTION_BINDER);
                 kernelActionBinder.bind(HIDEventEnum.ESC, KernelActionEnum.EXIT);
-                entitiesEnvironmentManager.setFlag(EntitiesEnvironmentManager.FLAG__EXIT_KEY_BOUND, true);
+                environmentManager.setFlag(EnvironmentManager.FLAG__EXIT_KEY_BOUND, true);
             }
 
             // level management
-            switch (levelManager.getCurrentLevel()) {
+            switch (levelStateManager.getCurrentLevel()) {
                 case START_SCREEN:
-                    StartScreenLevelManager.getInstance().run(kernelState, levelManager, entitiesEnvironmentManager);
+                    if (!environmentManager.getFlag(EnvironmentManager.FLAG__START_INITIALIZED)) {
+                        StartScreenLevelManager.getInstance().init(kernelState, environmentManager);
+                    }
+                    StartScreenLevelManager.getInstance().run(kernelState, levelStateManager, environmentManager);
                     break;
                 default:
-                    throw new TerminalErrorException(ImmutableSet.of(new TerminalGameException(GameErrorCode.LOGIC_ERROR, "Invalid level transition")));
+                    throw new TerminalErrorException(new SetBuilder<HashSet, TerminalGameException>(HashSet.class, System.out, false).add(
+                        new TerminalGameException(LabyrinthGameErrorCode.LEVEL__CORE__UNDEFINED_LEVEL, levelStateManager.getCurrentLevel())
+                    ).get());
             }
         } catch (TerminalErrorException e) {
             PRINTER.printError(e);
 
-            throw new TransientGameException(GameErrorCode.KERNEL_INJECTION_ERROR, e);
+            throw new TransientGameException(GameEngineErrorCode.KERNEL_INJECTION_ERROR, e);
         }
 
         PRINTER.printTrace("Labyrinth kernel-injected pre-processor ended...");

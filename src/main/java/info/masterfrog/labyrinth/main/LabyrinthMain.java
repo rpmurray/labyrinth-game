@@ -1,13 +1,13 @@
 package info.masterfrog.labyrinth.main;
 
-import com.google.common.collect.ImmutableMap;
-import info.masterfrog.labyrinth.entity.EntitiesEnvironmentConfigurator;
-import info.masterfrog.labyrinth.entity.EntitiesEnvironmentManager;
+import info.masterfrog.labyrinth.entity.EnvironmentConfigurator;
+import info.masterfrog.labyrinth.entity.EnvironmentManager;
 import info.masterfrog.labyrinth.enumeration.LevelHandle;
-import info.masterfrog.labyrinth.level.LevelManager;
+import info.masterfrog.labyrinth.level.LevelStateManager;
 import info.masterfrog.labyrinth.main.kernel.PreProcessingKernelInjection;
 import info.masterfrog.pixelcat.engine.common.printer.Printer;
 import info.masterfrog.pixelcat.engine.common.printer.PrinterFactory;
+import info.masterfrog.pixelcat.engine.common.util.MapBuilder;
 import info.masterfrog.pixelcat.engine.exception.TerminalErrorException;
 import info.masterfrog.pixelcat.engine.hid.HIDEventEnum;
 import info.masterfrog.pixelcat.engine.kernel.*;
@@ -27,7 +27,7 @@ public class LabyrinthMain {
             // set up general kernel state initialization properties
             HashMap<KernelStatePropertyEnum, Object> kernelStateInitProperties = new HashMap<>();
             kernelStateInitProperties.put(KernelStatePropertyEnum.LOG_LVL, Printer.getLogLevelInfo());
-            kernelStateInitProperties.put(KernelStatePropertyEnum.SCREEN_BOUNDS, new Rectangle(500, 500, 1280, 800));
+            kernelStateInitProperties.put(KernelStatePropertyEnum.SCREEN_BOUNDS, new Rectangle(50, 50, 1280, 800));
 
             // initialize
             kernel.init(kernelStateInitProperties);
@@ -39,19 +39,21 @@ public class LabyrinthMain {
 
             // init game objects
             LevelHandle startScreen = LevelHandle.START_SCREEN;
-            LevelManager levelManager = new LevelManager(startScreen);
-            EntitiesEnvironmentManager entitiesEnvironmentManager = new EntitiesEnvironmentManager(2);
-            EntitiesEnvironmentConfigurator entitiesEnvironmentConfigurator = new EntitiesEnvironmentConfigurator(
+            LevelStateManager levelStateManager = new LevelStateManager(startScreen);
+            EnvironmentManager environmentManager = new EnvironmentManager();
+            EnvironmentConfigurator environmentConfigurator = new EnvironmentConfigurator(
                 kernelState,
-                entitiesEnvironmentManager
+                environmentManager
             );
-            entitiesEnvironmentConfigurator.init();
-            kernel.registerGameObjectManagers(entitiesEnvironmentManager.getLevelEntities(startScreen));
+            environmentConfigurator.init();
+            kernel.registerGameObjectManagers(environmentManager.getLevelEntities(startScreen));
 
             // define kernel injections
-            Map<KernelInjectionEventEnum, KernelInjection> kernelInjectionMap = ImmutableMap.<KernelInjectionEventEnum, KernelInjection>of(
-                KernelInjectionEventEnum.PRE_PROCESSING, new PreProcessingKernelInjection(levelManager, entitiesEnvironmentManager)
-            );
+            Map<KernelInjectionEventEnum, KernelInjection> kernelInjectionMap = new MapBuilder<HashMap, KernelInjectionEventEnum, KernelInjection>(
+                HashMap.class, System.out, false
+            ).add(
+                KernelInjectionEventEnum.PRE_PROCESSING, new PreProcessingKernelInjection(levelStateManager, environmentManager)
+            ).get();
 
             // run the game kernel
             kernel.kernelMain(kernelInjectionMap);
