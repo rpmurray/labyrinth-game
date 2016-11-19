@@ -1,5 +1,6 @@
 package info.masterfrog.labyrinth.entity;
 
+import info.masterfrog.labyrinth.enumeration.CanvasHandle;
 import info.masterfrog.labyrinth.enumeration.EntityHandle;
 import info.masterfrog.labyrinth.enumeration.EntityManagerHandle;
 import info.masterfrog.labyrinth.enumeration.LevelHandle;
@@ -11,30 +12,51 @@ import info.masterfrog.pixelcat.engine.common.util.SetBuilder;
 import info.masterfrog.pixelcat.engine.exception.TerminalErrorException;
 import info.masterfrog.pixelcat.engine.exception.TerminalGameException;
 import info.masterfrog.pixelcat.engine.exception.TransientGameException;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObject;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObjectManager;
+import info.masterfrog.pixelcat.engine.kernel.CanvasManager;
+import info.masterfrog.pixelcat.engine.kernel.KernelState;
+import info.masterfrog.pixelcat.engine.kernel.KernelStateProperty;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.aspect.canvas.Canvas;
+import info.masterfrog.pixelcat.engine.logic.gameobject.manager.GameObjectManager;
+import info.masterfrog.pixelcat.engine.logic.gameobject.object.GameObject;
 import info.masterfrog.pixelcat.engine.logic.resource.Resource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class EnvironmentManager {
     private Map<ResourceHandle, Resource> resources;
     private Map<EntityHandle, GameObject> entities;
     private Map<EntityManagerHandle, GameObjectManager> entityManagers;
     private Map<LevelHandle, Set<EntityManagerHandle>> levels;
+    private Map<CanvasHandle, String> canvases;
     private Map<String, Boolean> stateFlags;
 
-    private static Printer PRINTER = PrinterFactory.getInstance().createPrinter(EnvironmentManager.class);
+    private static EnvironmentManager instance;
+
+    private static final Printer PRINTER = PrinterFactory.getInstance().createPrinter(EnvironmentManager.class);
 
     public static final String FLAG__START_INITIALIZED = "FLAG__START_INITIALIZED";
+    public static final String FLAG__LABYRINTH_INITIALIZED = "FLAG__LABYRINTH_INITIALIZED";
     public static final String FLAG__EXIT_KEY_BOUND = "FLAG__EXIT_KEY_BOUND";
 
-    public EnvironmentManager() throws TerminalErrorException {
+    public static EnvironmentManager getInstance() {
+        if (instance == null) {
+            instance = new EnvironmentManager();
+        }
+
+        return instance;
+    }
+
+    private EnvironmentManager() {
         this.resources = new HashMap<>();
         this.entities = new HashMap<>();
         this.entityManagers = new HashMap<>();
         this.levels = new HashMap<>();
+        this.canvases = new HashMap<>();
         this.stateFlags = new HashMap<>();
     }
 
@@ -172,6 +194,20 @@ public class EnvironmentManager {
         Boolean hasLevelEntities = levels.containsKey(handle);
 
         return hasLevelEntities;
+    }
+
+    public void registerCanvas(CanvasHandle canvasHandle, String canvasId) {
+        canvases.put(canvasHandle, canvasId);
+    }
+
+    public Canvas getCanvas(CanvasHandle canvasHandle) throws TransientGameException {
+        Canvas canvas = KernelState.getInstance().<CanvasManager>getProperty(
+            KernelStateProperty.CANVAS_MANAGER
+        ).get(
+            canvases.get(canvasHandle)
+        );
+
+        return canvas;
     }
 
     public Boolean getFlag(String flag) {

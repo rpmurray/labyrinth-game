@@ -31,6 +31,10 @@ public enum LabyrinthGameErrorCode implements GameErrorCode {
     // 121XXXs codes reserved for start screen logic errors
     LEVEL__START_SCREEN__INVALID_STATE(121001L, "Invalid start screen state referenced."),
     LEVEL__LABYRINTH__INVALID_STATE(121002L, "Invalid labyrinth level state referenced."),
+
+    // 122XXXx codes reserved for labyrinth room logic errors
+    LEVEL__LABYRINTH__OUT_OF_BOUNDS(122001L, "Out of bounds reference for graph, puzzle, or some other labyrinth entity."),
+    LEVEL__LABYRINTH__RESOURCE_REFERENCE_ERROR(122002L, "Resource referenced when not available."),
     ;
 
     private Long code;

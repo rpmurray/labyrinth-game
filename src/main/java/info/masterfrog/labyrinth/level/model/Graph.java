@@ -1,7 +1,15 @@
 package info.masterfrog.labyrinth.level.model;
 
-import java.awt.*;
-import java.util.*;
+import info.masterfrog.labyrinth.exception.LabyrinthGameErrorCode;
+import info.masterfrog.pixelcat.engine.exception.TransientGameException;
+
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Graph {
     private int[][] vertexMatrix;
@@ -42,14 +50,14 @@ public class Graph {
      * @param maxCardinality maximum number of edges per vertex,
      *                       if -1 no maximum is enforced
      * @return Graph
-     * @throws Exception
+     * @throws TransientGameException
      */
     public static Graph generateByPathWalk(int vertexCount,
                                            double randomWeight,
                                            int minExtraEdges,
                                            int maxExtraEdges,
                                            int maxCardinality)
-        throws Exception {
+        throws TransientGameException {
         // setup
         Graph graph = new Graph(vertexCount);
         int extraEdgesCount = 0;
@@ -65,10 +73,16 @@ public class Graph {
 
         // validate extra edge criteria
         if (minExtraEdges < extraEdgesLowerBoundary || minExtraEdges > extraEdgesUpperBoundary) {
-            throw new Exception("min number of extra edges out of bounds: " + minExtraEdges + "|" + extraEdgesLowerBoundary + ":" + extraEdgesUpperBoundary);
+            throw new TransientGameException(
+                LabyrinthGameErrorCode.LEVEL__LABYRINTH__OUT_OF_BOUNDS,
+                "min number of extra edges: " + minExtraEdges + "|" + extraEdgesLowerBoundary + ":" + extraEdgesUpperBoundary
+            );
         }
         if (maxExtraEdges < extraEdgesLowerBoundary || maxExtraEdges > extraEdgesUpperBoundary) {
-            throw new Exception("max number of extra edges out of bounds: " + maxExtraEdges + "|" + extraEdgesLowerBoundary + ":" + extraEdgesUpperBoundary);
+            throw new TransientGameException(
+                LabyrinthGameErrorCode.LEVEL__LABYRINTH__OUT_OF_BOUNDS,
+                "max number of extra edges: " + maxExtraEdges + "|" + extraEdgesLowerBoundary + ":" + extraEdgesUpperBoundary
+            );
         }
 
         // deterministically generate hamiltonian cycle in graph and add in other random edges
@@ -126,12 +140,12 @@ public class Graph {
         return graph;
     }
 
-    public void addEdge(int v1, int v2) throws Exception {
+    public void addEdge(int v1, int v2) throws TransientGameException {
         if (v1 < 0 || v1 > vertexMatrix.length) {
-            throw new Exception("vertex 1 out of bounds");
+            throw new TransientGameException(LabyrinthGameErrorCode.LEVEL__LABYRINTH__OUT_OF_BOUNDS, "vertex 1");
         }
         if (v2 < 0 || v2 > vertexMatrix[v1].length) {
-            throw new Exception("vertex 2 out of bounds");
+            throw new TransientGameException(LabyrinthGameErrorCode.LEVEL__LABYRINTH__OUT_OF_BOUNDS, "vertex 2");
         }
         vertexMatrix[v1][v2] = 1;
         vertexMatrix[v2][v1] = 1;

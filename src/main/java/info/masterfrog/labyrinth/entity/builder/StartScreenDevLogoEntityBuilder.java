@@ -1,19 +1,22 @@
 package info.masterfrog.labyrinth.entity.builder;
 
 import info.masterfrog.labyrinth.entity.EnvironmentManager;
+import info.masterfrog.labyrinth.enumeration.CanvasHandle;
 import info.masterfrog.labyrinth.enumeration.ResourceHandle;
 import info.masterfrog.pixelcat.engine.common.printer.Printer;
 import info.masterfrog.pixelcat.engine.common.printer.PrinterFactory;
 import info.masterfrog.pixelcat.engine.exception.TransientGameException;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObject;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObjectManager;
-import info.masterfrog.pixelcat.engine.logic.gameobject.feature.Renderable;
-import info.masterfrog.pixelcat.engine.logic.gameobject.feature.ResourceLibrary;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.aspect.rendering.Rendering;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.feature.RenderingLibrary;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.feature.ResourceLibrary;
+import info.masterfrog.pixelcat.engine.logic.gameobject.manager.GameObjectManager;
+import info.masterfrog.pixelcat.engine.logic.gameobject.object.GameObject;
 import info.masterfrog.pixelcat.engine.logic.resource.ResourceFactory;
 import info.masterfrog.pixelcat.engine.logic.resource.SpriteResource;
 import info.masterfrog.pixelcat.engine.logic.resource.SpriteSheet;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 class StartScreenDevLogoEntityBuilder {
     private EnvironmentManager environmentManager;
@@ -35,7 +38,14 @@ class StartScreenDevLogoEntityBuilder {
     StartScreenDevLogoEntityBuilder generate() throws TransientGameException {
         // register rendering properties
         entity.registerFeature(
-            Renderable.create(new Point(screenBounds.width / 2 - 210, screenBounds.height / 2 - 210), 1, 0.25)
+            RenderingLibrary.create().add(
+                Rendering.create(
+                    EnvironmentManager.getInstance().getCanvas(CanvasHandle.MAIN),
+                    new Point(screenBounds.width / 2 - 210, screenBounds.height / 2 - 210),
+                    1,
+                    0.25
+                )
+            )
         );
 
         // define resources

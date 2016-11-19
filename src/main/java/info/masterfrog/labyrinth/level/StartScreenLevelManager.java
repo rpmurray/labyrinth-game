@@ -1,7 +1,7 @@
 package info.masterfrog.labyrinth.level;
 
 import info.masterfrog.labyrinth.entity.EnvironmentManager;
-import info.masterfrog.labyrinth.entity.builder.EntitiesBuilder;
+import info.masterfrog.labyrinth.entity.builder.StartScreenEntitiesBuilder;
 import info.masterfrog.labyrinth.enumeration.EntityManagerHandle;
 import info.masterfrog.labyrinth.enumeration.EntityHandle;
 import info.masterfrog.labyrinth.enumeration.LevelHandle;
@@ -10,26 +10,33 @@ import info.masterfrog.labyrinth.exception.LabyrinthGameErrorCode;
 import info.masterfrog.pixelcat.engine.common.printer.Printer;
 import info.masterfrog.pixelcat.engine.common.printer.PrinterFactory;
 import info.masterfrog.pixelcat.engine.common.util.SetBuilder;
-import info.masterfrog.pixelcat.engine.exception.*;
+import info.masterfrog.pixelcat.engine.exception.TerminalErrorException;
+import info.masterfrog.pixelcat.engine.exception.TerminalGameException;
+import info.masterfrog.pixelcat.engine.exception.TransientGameException;
 import info.masterfrog.pixelcat.engine.kernel.KernelState;
-import info.masterfrog.pixelcat.engine.kernel.KernelStatePropertyEnum;
+import info.masterfrog.pixelcat.engine.kernel.KernelStateProperty;
 import info.masterfrog.pixelcat.engine.logic.clock.GameClock;
 import info.masterfrog.pixelcat.engine.logic.clock.GameClockFactory;
 import info.masterfrog.pixelcat.engine.logic.clock.SimpleGameClock;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObject;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObjectManager;
-import info.masterfrog.pixelcat.engine.logic.gameobject.feature.Renderable;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.aspect.rendering.Rendering;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.feature.RenderingLibrary;
+import info.masterfrog.pixelcat.engine.logic.gameobject.manager.GameObjectManager;
+import info.masterfrog.pixelcat.engine.logic.gameobject.object.GameObject;
 import info.masterfrog.pixelcat.engine.logic.resource.SpriteResource;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.HashSet;
 
-public class StartScreenLevelManager {
+public class StartScreenLevelManager implements LevelManager {
     private static StartScreenLevelManager instance;
 
     private SimpleGameClock clock;
     private SimpleGameClock stateTimer;
     private String state;
+
+    private static EnvironmentManager environmentManager = EnvironmentManager.getInstance();
+    private static LevelStateManager levelStateManager = LevelStateManager.getInstance();
 
     private static final String STATE__INIT = "STATE__INIT";
     private static final String STATE__WARM_UP = "STATE__WARM_UP";
@@ -60,24 +67,25 @@ public class StartScreenLevelManager {
         return instance;
     }
 
-    public void init(KernelState kernelState, EnvironmentManager environmentManager) throws TransientGameException {
+    public void init() throws TransientGameException {
                // setup
-        Rectangle screenBounds = ((Rectangle) kernelState.getProperty(KernelStatePropertyEnum.SCREEN_BOUNDS));
+        Rectangle screenBounds = KernelState.getInstance().getProperty(KernelStateProperty.SCREEN_BOUNDS);
 
         // init game object manager
         GameObjectManager startScreenEntityManager = GameObjectManager.create(2);
 
         // init game object builder
-        EntitiesBuilder entitiesBuilder = EntitiesBuilder.getInstance(environmentManager, startScreenEntityManager, screenBounds);
+        StartScreenEntitiesBuilder startScreenEntitiesBuilder = StartScreenEntitiesBuilder.getInstance();
+        startScreenEntitiesBuilder.init(startScreenEntityManager, screenBounds);
 
         // start screen bg
-        GameObject background = entitiesBuilder.buildStartScreenBackgroundEntity();
+        GameObject background = startScreenEntitiesBuilder.buildBackgroundEntity();
 
         // dev logo
-        GameObject devLogo = entitiesBuilder.buildStartScreenDevLogoEntity();
+        GameObject devLogo = startScreenEntitiesBuilder.buildDevLogoEntity();
 
         // title
-        GameObject title = entitiesBuilder.buildStartScrenTitleEntity();
+        GameObject title = startScreenEntitiesBuilder.buildTitleEntity();
 
         // store entity manager
         environmentManager.registerEntityManager(
@@ -105,8 +113,7 @@ public class StartScreenLevelManager {
         );
     }
 
-    public void run(KernelState kernelState, LevelStateManager levelStateManager, EnvironmentManager environmentManager)
-                throws TransientGameException, TerminalErrorException {
+    public void run() throws TransientGameException, TerminalErrorException {
         switch (state) {
             case STATE__INIT:
                 // do init work
@@ -267,9 +274,11 @@ public class StartScreenLevelManager {
                     ((SpriteResource) environmentManager.getResource(
                         ResourceHandle.START_SCREEN__SPRITE__TITLE
                     )).setAlphaMask(1.0f);
-                    Renderable title = environmentManager.getEntity(
+                    Rendering title = environmentManager.getEntity(
                         EntityHandle.START_SCREEN__TITLE_TEXT
-                    ).getFeature(Renderable.class);
+                    ).getFeature(RenderingLibrary.class).getCurrent(
+                        environmentManager.getEntity(EntityHandle.START_SCREEN__TITLE_TEXT).getCanvas()
+                    );
                     title.setPosition(
                         new Point(title.getPosition().x, title.getPosition().y / 4)
                     );

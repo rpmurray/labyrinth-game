@@ -1,41 +1,71 @@
 package info.masterfrog.labyrinth.level;
 
 import info.masterfrog.labyrinth.enumeration.LevelHandle;
+import info.masterfrog.labyrinth.exception.LabyrinthGameErrorCode;
 import info.masterfrog.pixelcat.engine.common.util.MapBuilder;
+import info.masterfrog.pixelcat.engine.exception.TransientGameException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class LevelStateManager {
     private LevelHandle currentLevel;
+    private Integer currentLabyrinthIndex;
 
-    public static final String START_SCREEN = "start screen";
-    public static final String LEVEL_ONE = "level one";
+    private static LevelStateManager instance;
 
-    private static final Map<LevelHandle, LevelHandle> LEVEL_TRANSITIONS = new MapBuilder<HashMap, LevelHandle, LevelHandle>(
-        HashMap.class, System.out, false
-    ).add(
-        LevelHandle.START_SCREEN, LevelHandle.LABYRINTH
-    ).get();
+    public static LevelStateManager getInstance() {
+        if (instance == null) {
+            instance = new LevelStateManager();
+        }
 
+        return instance;
+    }
 
-    public LevelStateManager(LevelHandle currentLevel) {
+    private LevelStateManager() {
+        // do nothing
+    }
+
+    public void init(LevelHandle currentLevel, int currentLabyrinthIndex) {
         this.currentLevel = currentLevel;
+        this.currentLabyrinthIndex = currentLabyrinthIndex;
     }
 
     public LevelHandle getCurrentLevel() {
         return currentLevel;
     }
 
-    public LevelHandle getNextLevel() {
-        // check for level transition
-        if (!LEVEL_TRANSITIONS.containsKey(currentLevel)) {
-            return null;
+    public LevelManager getCurrentLevelManager() throws TransientGameException {
+        LevelManager levelManager;
+        switch (currentLevel) {
+            case START_SCREEN:
+                levelManager = StartScreenLevelManager.getInstance();
+                break;
+            case LABYRINTH:
+                levelManager = LabyrinthLevelManager.getInstance();
+                break;
+            default:
+                throw new TransientGameException(LabyrinthGameErrorCode.LEVEL__CORE__UNDEFINED_LEVEL);
         }
 
-        // update current level
-        currentLevel = LEVEL_TRANSITIONS.get(currentLevel);
+        return levelManager;
+    }
+
+    public LevelHandle getNextLevel() {
+        // check for level transition
+        switch (currentLevel) {
+            case START_SCREEN:
+                currentLevel = LevelHandle.LABYRINTH;
+                currentLabyrinthIndex = 1;
+                break;
+            case LABYRINTH:
+                currentLabyrinthIndex++;
+        }
 
         return currentLevel;
+    }
+
+    public Integer getCurrentLabyrinthIndex() {
+        return currentLabyrinthIndex;
     }
 }

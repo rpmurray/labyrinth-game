@@ -1,6 +1,7 @@
 package info.masterfrog.labyrinth.level.render;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Point;
 
 public class TextRenderingEngine implements RenderingEngine {
     String text;

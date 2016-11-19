@@ -1,16 +1,22 @@
 package info.masterfrog.labyrinth.entity.builder;
 
 import info.masterfrog.labyrinth.entity.EnvironmentManager;
+import info.masterfrog.labyrinth.enumeration.CanvasHandle;
 import info.masterfrog.labyrinth.enumeration.ResourceHandle;
 import info.masterfrog.pixelcat.engine.common.printer.Printer;
 import info.masterfrog.pixelcat.engine.common.printer.PrinterFactory;
 import info.masterfrog.pixelcat.engine.exception.TransientGameException;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObject;
-import info.masterfrog.pixelcat.engine.logic.gameobject.GameObjectManager;
-import info.masterfrog.pixelcat.engine.logic.gameobject.feature.*;
-import info.masterfrog.pixelcat.engine.logic.resource.*;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.aspect.rendering.Rendering;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.feature.RenderingLibrary;
+import info.masterfrog.pixelcat.engine.logic.gameobject.element.feature.ResourceLibrary;
+import info.masterfrog.pixelcat.engine.logic.gameobject.manager.GameObjectManager;
+import info.masterfrog.pixelcat.engine.logic.gameobject.object.GameObject;
+import info.masterfrog.pixelcat.engine.logic.resource.ResourceFactory;
+import info.masterfrog.pixelcat.engine.logic.resource.SpriteResource;
+import info.masterfrog.pixelcat.engine.logic.resource.SpriteSheet;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 class StartScreenBackgroundEntityBuilder {
     private EnvironmentManager environmentManager;
@@ -33,14 +39,17 @@ class StartScreenBackgroundEntityBuilder {
     StartScreenBackgroundEntityBuilder generate() throws TransientGameException {
         // register rendering properties
         entity.registerFeature(
-            Renderable.create(new Point(0, 0), 0)
+            RenderingLibrary.create().add(
+                Rendering.create(
+                    EnvironmentManager.getInstance().getCanvas(CanvasHandle.MAIN),
+                    new Point(0, 0),
+                    0
+                )
+            )
         );
 
         // define resources
         defineResources();
-
-        // define sounds
-        defineSounds();
 
         return this;
     }
@@ -50,13 +59,16 @@ class StartScreenBackgroundEntityBuilder {
     }
 
     private void defineResources() throws TransientGameException {
+        // generate resource library
+        ResourceLibrary resourceLibrary = ResourceLibrary.create();
+
         // generate sprite sheet
         SpriteSheet startScreenBGSpriteSheet = resourceFactory.createSpriteSheet(
             "start-screen-bg.png",
             1280, 800
         );
 
-        // define resources
+        // define image resources
         environmentManager.registerResource(
             ResourceHandle.START_SCREEN__SPRITE__BACKGROUND,
             resourceFactory.createSpriteResource(0, 0, startScreenBGSpriteSheet, 0.0f)
@@ -68,26 +80,25 @@ class StartScreenBackgroundEntityBuilder {
             )
         );
 
-        // register resources
-        entity.registerFeature(
-            ResourceLibrary.create().add(
-                environmentManager.getResource(ResourceHandle.START_SCREEN__IMAGE__BACKGROUND)
-            )
+        // add image resources
+        resourceLibrary.add(
+            environmentManager.getResource(ResourceHandle.START_SCREEN__IMAGE__BACKGROUND)
         );
-    }
 
-    private void defineSounds() throws TransientGameException {
-        // define sounds
+        // define sound resources
         environmentManager.registerResource(
             ResourceHandle.START_SCREEN__SOUND__INTRO_MUSIC,
             resourceFactory.createSoundResource("start-screen.ogg", 20.0f)
         );
 
-        // register sounds
+        // add sound resources
+        resourceLibrary.add(
+            environmentManager.getResource(ResourceHandle.START_SCREEN__SOUND__INTRO_MUSIC)
+        );
+
+        // register resources
         entity.registerFeature(
-            SoundLibrary.create().add(
-                (SoundResource) environmentManager.getResource(ResourceHandle.START_SCREEN__SOUND__INTRO_MUSIC)
-            )
+            resourceLibrary
         );
     }
 }

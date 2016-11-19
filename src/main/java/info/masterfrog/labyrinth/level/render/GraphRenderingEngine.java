@@ -3,7 +3,10 @@ package info.masterfrog.labyrinth.level.render;
 import info.masterfrog.labyrinth.level.model.Graph;
 import info.masterfrog.labyrinth.level.model.Pair;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Point;
 
 public class GraphRenderingEngine implements RenderingEngine {
     private Graph graph;
